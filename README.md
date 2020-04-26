@@ -1,13 +1,13 @@
-Android Fundamentals in Kotlin Starter Apps
+Android Fundamentals in Kotlin Solution Apps
 ===========================================
 
-This repository contains the starter code for the apps for the
+This repository contains the solution code for the apps for the
 Android Fundamentals in Kotlin course, published by the Google Developer Training Team.
 See [Android Training](https://developer.android.com/courses).
 
-A starter app” is an app that contains the code for starting a codelab.
+A “solution app” is an app that contains the code for a completed codelab.
 
-Code for the solution apps in this course are in a different repository.
+Code for the starter apps in this course are in a different repository.
 
 Introduction
 ------------
