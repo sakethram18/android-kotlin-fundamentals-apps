@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright 2018, The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +14,12 @@
   ~ limitations under the License.
   -->
 
-<menu xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<set xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item
-        android:id="@+id/share"
-        android:enabled="true"
-        android:icon="@drawable/share"
-        android:title="@string/share"
-        app:showAsAction="ifRoom|collapseActionView" />
-</menu>
+    <translate
+        android:duration="@android:integer/config_shortAnimTime"
+        android:fromXDelta="-100%"
+        android:fromYDelta="0%"
+        android:toXDelta="0%"
+        android:toYDelta="0%" />
+</set>
