@@ -56,4 +56,11 @@ dependencies {
     // Navigation
     implementation "android.arch.navigation:navigation-fragment-ktx:1.0.0"
     implementation "android.arch.navigation:navigation-ui-ktx:1.0.0"
+
+    // ViewModel
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+
+    //Timber logs
+    implementation 'com.jakewharton.timber:timber:4.7.1'
+
 }
