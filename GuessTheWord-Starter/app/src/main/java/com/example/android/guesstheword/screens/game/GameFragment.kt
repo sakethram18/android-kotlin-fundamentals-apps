@@ -23,6 +23,8 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import com.example.android.guesstheword.R
 import com.example.android.guesstheword.databinding.GameFragmentBinding
 import timber.log.Timber
@@ -52,10 +54,18 @@ class GameFragment : Fragment() {
 
         binding.correctButton.setOnClickListener { onCorrect() }
         binding.skipButton.setOnClickListener { onSkip() }
+        binding.endGameButton.setOnClickListener { onEnd() }
         updateScoreText()
         updateWordText()
         return binding.root
 
+    }
+
+    private fun onEnd() {
+        val action: GameFragmentDirections.ActionGameToScore
+                = GameFragmentDirections.actionGameToScore()
+        action.score = gameViewModel.score
+        NavHostFragment.findNavController(this).navigate(action)
     }
 
     /** Methods for buttons presses **/
