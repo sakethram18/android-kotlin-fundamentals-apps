@@ -20,10 +20,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import com.example.android.guesstheword.R
 import com.example.android.guesstheword.databinding.GameFragmentBinding
@@ -55,41 +56,38 @@ class GameFragment : Fragment() {
         binding.correctButton.setOnClickListener { onCorrect() }
         binding.skipButton.setOnClickListener { onSkip() }
         binding.endGameButton.setOnClickListener { onEnd() }
-        updateScoreText()
-        updateWordText()
+
+        gameViewModel.score.observe(viewLifecycleOwner, Observer { newScore ->
+            binding.scoreText.text = newScore.toString()
+        })
+        gameViewModel.word.observe(viewLifecycleOwner, Observer { newWord ->
+            binding.wordText.text = newWord
+        })
+        gameViewModel.gameFinished.observe(viewLifecycleOwner, Observer { hasFinished ->
+            if (hasFinished) onEnd()
+        })
         return binding.root
 
     }
 
     private fun onEnd() {
+        Toast.makeText(activity, "Game has just finished", Toast.LENGTH_SHORT).show()
+
         val action: GameFragmentDirections.ActionGameToScore
                 = GameFragmentDirections.actionGameToScore()
-        action.score = gameViewModel.score
+        action.score = gameViewModel.score.value?:0
         NavHostFragment.findNavController(this).navigate(action)
+
+        gameViewModel.onGameFinishCompleted()
     }
 
     /** Methods for buttons presses **/
 
     private fun onSkip() {
         gameViewModel.onSkip()
-        updateWordText()
-        updateScoreText()
     }
 
     private fun onCorrect() {
         gameViewModel.onCorrect()
-        updateWordText()
-        updateScoreText()
-    }
-
-    /** Methods for updating the UI **/
-
-    private fun updateWordText() {
-        Timber.i("Setting the word on UI to ${gameViewModel.word}")
-        binding.wordText.text = gameViewModel.word
-    }
-
-    private fun updateScoreText() {
-        binding.scoreText.text = gameViewModel.score.toString()
     }
 }
