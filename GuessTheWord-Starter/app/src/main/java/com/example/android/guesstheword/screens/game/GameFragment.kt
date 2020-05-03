@@ -53,16 +53,11 @@ class GameFragment : Fragment() {
         Timber.i("Called ViewModelProvider#get")
         gameViewModel = ViewModelProvider(this).get(GameViewModel::class.java)
 
-        binding.correctButton.setOnClickListener { onCorrect() }
-        binding.skipButton.setOnClickListener { onSkip() }
-        binding.endGameButton.setOnClickListener { onEnd() }
+        // Set the viewmodel for databinding - this allows the bound layout access
+        // to all the data in the ViewModel
+        binding.gameViewModel = this.gameViewModel
+        binding.lifecycleOwner = viewLifecycleOwner
 
-        gameViewModel.score.observe(viewLifecycleOwner, Observer { newScore ->
-            binding.scoreText.text = newScore.toString()
-        })
-        gameViewModel.word.observe(viewLifecycleOwner, Observer { newWord ->
-            binding.wordText.text = newWord
-        })
         gameViewModel.gameFinished.observe(viewLifecycleOwner, Observer { hasFinished ->
             if (hasFinished) onEnd()
         })
@@ -79,15 +74,5 @@ class GameFragment : Fragment() {
         NavHostFragment.findNavController(this).navigate(action)
 
         gameViewModel.onGameFinishCompleted()
-    }
-
-    /** Methods for buttons presses **/
-
-    private fun onSkip() {
-        gameViewModel.onSkip()
-    }
-
-    private fun onCorrect() {
-        gameViewModel.onCorrect()
     }
 }

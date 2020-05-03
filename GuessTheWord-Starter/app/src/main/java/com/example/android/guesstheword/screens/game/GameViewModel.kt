@@ -1,15 +1,23 @@
 package com.example.android.guesstheword.screens.game
 
+import android.os.CountDownTimer
+import android.text.format.DateUtils
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
-import timber.log.Timber
 
-class GameViewModel: ViewModel() {
+class GameViewModel : ViewModel() {
     // The current word
     private var _word = MutableLiveData<String>()
     val word: LiveData<String>
         get() = _word
+    val wordHint: LiveData<WordHint> = Transformations.map(word) { word ->
+        val random = (1..word.length).random()
+        WordHint(word.length, random, word[random - 1].toUpperCase())
+    }
+
+    data class WordHint(val wordSize: Int, val randomPosition: Int, val randomLetter: Char)
 
     // The current score
     private var _score = MutableLiveData<Int>()
@@ -21,13 +29,33 @@ class GameViewModel: ViewModel() {
     val gameFinished: LiveData<Boolean>
         get() = _gameFinished
 
+    private var _currentTime = MutableLiveData<Long>()
+    private val currentTime: LiveData<Long>
+        get() = _currentTime
+    val currentTimeString: LiveData<String> = Transformations.map(currentTime) {
+        time -> DateUtils.formatElapsedTime(time)
+    }
+
+    private var timer: CountDownTimer
+
     init {
-        Timber.i("GameViewModel created!")
-        resetList()
-        nextWord()
         _word.value = ""
         _score.value = 0
+        resetList()
+        nextWord()
         _gameFinished.value = false
+
+        timer = object : CountDownTimer(GAME_DURATION, ONE_SECOND) {
+            override fun onFinish() {
+                _currentTime.value = GAME_FINISH
+                onGameFinished()
+            }
+
+            override fun onTick(p0: Long) {
+                _currentTime.value = p0/ ONE_SECOND
+            }
+        }
+        timer.start()
     }
 
     // The list of words - the front of the list is the next word to guess
@@ -86,16 +114,24 @@ class GameViewModel: ViewModel() {
     private fun nextWord() {
         if (wordList.isNotEmpty()) {
             //Select and remove a word from the list
-            val temp = wordList.removeAt(0)
-            Timber.i("Setting word to $temp")
-            _word.value = temp
+            _word.value = wordList.removeAt(0)
         } else {
-            _gameFinished.value = true
+            resetList()
         }
+    }
+
+    fun onGameFinished() {
+        _gameFinished.value = true
     }
 
     override fun onCleared() {
         super.onCleared()
-        Timber.i("GameViewModel cleared!")
+        timer.cancel()
+    }
+
+    companion object {
+        private const val GAME_FINISH = 0L
+        private const val ONE_SECOND = 1000L
+        private const val GAME_DURATION = 30000L
     }
 }
