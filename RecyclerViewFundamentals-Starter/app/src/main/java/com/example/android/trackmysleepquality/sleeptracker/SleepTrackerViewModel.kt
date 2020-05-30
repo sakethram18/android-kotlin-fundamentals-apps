@@ -121,6 +121,17 @@ class SleepTrackerViewModel(
         get() = _navigateToSleepQuality
 
     /**
+     * Variable that tells the Fragment to navigate to the sleep details page
+     */
+    private val _navigateToSleepDetails = MutableLiveData<Long>()
+
+    /**
+     * If this is non-null, immediately navigate to [SleepDetailFragment] and call [doneNavigatingToDetails]
+     */
+    val navigateToSleepDetails: LiveData<Long>
+        get() = _navigateToSleepDetails
+
+    /**
      * Call this immediately after calling `show()` on a toast.
      *
      * It will clear the toast request, so if the user rotates their phone it won't show a duplicate
@@ -138,6 +149,22 @@ class SleepTrackerViewModel(
      */
     fun doneNavigating() {
         _navigateToSleepQuality.value = null
+    }
+
+    /**
+     * When an individual sleep night item is clicked
+     */
+    fun onSleepNightClicked(nightId: Long) {
+        _navigateToSleepDetails.value = nightId
+    }
+
+
+    /**
+     * Call this immediately after navigating to [SleepDetailsFragment]. It will clear the
+     * navigation request, so that if the user rotates the device, it won't navigate twice.
+     */
+    fun doneNavigatingToDetails() {
+        _navigateToSleepDetails.value = null
     }
 
     init {

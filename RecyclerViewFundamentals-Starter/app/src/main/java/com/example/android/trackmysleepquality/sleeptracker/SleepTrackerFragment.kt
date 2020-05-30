@@ -20,6 +20,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -108,15 +109,35 @@ class SleepTrackerFragment : Fragment() {
             }
         })
 
-        val sleepListAdapter = SleepTrackerAdapter()
+        sleepTrackerViewModel.navigateToSleepDetails.observe(this, Observer { nightId ->
+            nightId?.let {
+                this.findNavController().navigate(
+                        SleepTrackerFragmentDirections
+                                .actionSleepTrackerFragmentToSleepDetailFragment(nightId))
+                sleepTrackerViewModel.doneNavigatingToDetails()
+            }
+        })
+
+        val sleepListAdapter = SleepTrackerAdapter(SleepNightListener { nightId ->
+            Toast.makeText(context, "$nightId", Toast.LENGTH_LONG).show()
+            sleepTrackerViewModel.onSleepNightClicked(nightId)
+        })
+
         binding.sleepList.adapter = sleepListAdapter
         sleepTrackerViewModel.nights.observe(this, Observer { nights ->
             nights?.let {
-                sleepListAdapter.submitList(nights)
+                sleepListAdapter.addHeaderAndSubmitList(nights)
             }
         })
 
         val layoutManager = GridLayoutManager(activity,3)
+        layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+            override fun getSpanSize(position: Int): Int = when(position) {
+                ITEM_VIEW_TYPE_HEADER -> 3
+                else -> 1
+            }
+        }
+
         binding.sleepList.layoutManager = layoutManager
         return binding.root
     }
