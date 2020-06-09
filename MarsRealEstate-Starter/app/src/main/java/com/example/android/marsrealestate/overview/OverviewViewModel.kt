@@ -26,20 +26,26 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+
+/**
+ * Enum class to represent the loading status of the Mars Api
+ */
+enum class MarsApiStatus { LOADING, SUCCESS, ERROR }
 
 /**
  * The [ViewModel] that is attached to the [OverviewFragment].
  */
 class OverviewViewModel : ViewModel() {
 
-    // The internal MutableLiveData String that stores the most recent response
-    private val _response = MutableLiveData<String>()
-    // The external immutable LiveData for the response String
-    val response: LiveData<String>
-        get() = _response
+    // The internal MutableLiveData status that stores the most recent response
+    private val _status = MutableLiveData<MarsApiStatus>()
+    // The external immutable LiveData for the response status
+    val status: LiveData<MarsApiStatus>
+        get() = _status
+
+    private val _properties = MutableLiveData<List<MarsProperty>>()
+    val properties: LiveData<List<MarsProperty>>
+        get() = _properties
 
     private val viewModelJob = Job()
     private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Main)
@@ -58,11 +64,15 @@ class OverviewViewModel : ViewModel() {
         coroutineScope.launch {
             val getPropertiesDeferred = MarsApi.retrofitService.getPropertiesAsync()
             try {
+                _status.value = MarsApiStatus.LOADING
                 val listOfProperties = getPropertiesDeferred.await()
-                _response.value = "Success: ${listOfProperties.size} properties retrieved"
-
+                _status.value = MarsApiStatus.SUCCESS
+                if (listOfProperties.isNotEmpty()) {
+                    _properties.value = listOfProperties
+                }
             } catch (exception: Exception) {
-                _response.value = "Failure: " + exception.message
+                _status.value = MarsApiStatus.ERROR
+                _properties.value = emptyList()
             }
         }
     }
