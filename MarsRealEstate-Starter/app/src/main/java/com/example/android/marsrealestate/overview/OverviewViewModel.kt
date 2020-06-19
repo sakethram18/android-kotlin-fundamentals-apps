@@ -21,6 +21,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.android.marsrealestate.network.MarsApi
+import com.example.android.marsrealestate.network.MarsApiFilter
 import com.example.android.marsrealestate.network.MarsProperty
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,6 +40,7 @@ class OverviewViewModel : ViewModel() {
 
     // The internal MutableLiveData status that stores the most recent response
     private val _status = MutableLiveData<MarsApiStatus>()
+
     // The external immutable LiveData for the response status
     val status: LiveData<MarsApiStatus>
         get() = _status
@@ -47,6 +49,10 @@ class OverviewViewModel : ViewModel() {
     val properties: LiveData<List<MarsProperty>>
         get() = _properties
 
+    private val _selectedProperty = MutableLiveData<MarsProperty>()
+    val selectedProperty: LiveData<MarsProperty>
+        get() = _selectedProperty
+
     private val viewModelJob = Job()
     private val coroutineScope = CoroutineScope(viewModelJob + Dispatchers.Main)
 
@@ -54,15 +60,15 @@ class OverviewViewModel : ViewModel() {
      * Call getMarsRealEstateProperties() on init so we can display status immediately.
      */
     init {
-        getMarsRealEstateProperties()
+        updateFilter(MarsApiFilter.SHOW_ALL)
     }
 
     /**
      * Sets the value of the status LiveData to the Mars API status.
      */
-    private fun getMarsRealEstateProperties() {
+    private fun getMarsRealEstateProperties(filterType: MarsApiFilter) {
         coroutineScope.launch {
-            val getPropertiesDeferred = MarsApi.retrofitService.getPropertiesAsync()
+            val getPropertiesDeferred = MarsApi.retrofitService.getPropertiesAsync(filterType.type)
             try {
                 _status.value = MarsApiStatus.LOADING
                 val listOfProperties = getPropertiesDeferred.await()
@@ -75,6 +81,18 @@ class OverviewViewModel : ViewModel() {
                 _properties.value = emptyList()
             }
         }
+    }
+
+    fun updateFilter(filterType: MarsApiFilter) {
+        getMarsRealEstateProperties(filterType)
+    }
+
+    fun displaySelectedProperty(marsProperty: MarsProperty) {
+        _selectedProperty.value = marsProperty
+    }
+
+    fun displayPropertyDetailsComplete() {
+        _selectedProperty.value = null
     }
 
     override fun onCleared() {
